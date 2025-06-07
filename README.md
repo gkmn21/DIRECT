@@ -1,9 +1,6 @@
-# DIRECT
-Source code for paper 'DIRECT: Deep Reinforcement Learning for Tourist Route Recommendation'
-
 # DIRECT: Deep Reinforcement Learning for Tourist Route Recommendation
 
-This folder contains the source code for the paper **DIRECT: Deep Reinforcement Learning for Tourist Route Recommendation**.
+Source code for the paper **DIRECT: Deep Reinforcement Learning for Tourist Route Recommendation**.
 
 
 ## Dependencies
