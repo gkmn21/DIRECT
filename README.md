@@ -18,7 +18,7 @@ Dependencies include:
 ## Dataset Generation
 The folder `dataset_generation` contains scripts to generate datasets.
 
-- Run script `prepare_data.py` to fetch data from OSM for a region. The generated dataset files will be saved in `data` folder.
+- Run script `dataset_generation/prepare_data.py` to fetch data from OSM for a region. The generated dataset files will be saved in `data` folder.
 
 ## DIRECT Model
 - Run script `run_model.py` to train the model.
