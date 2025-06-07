@@ -7,7 +7,6 @@ import pandas as pd
 import networkx as nx
 import numpy as np
 
-os.chdir('/media/data/mann/RL/RL/')
 from utils import read_data, rescale_inputs
 
 #%%
@@ -89,9 +88,9 @@ def greedy_path_builder(final_pois_df, distance_matrix, idx2poiid, iteration_POI
 if __name__ == '__main__':
     #%%
     CITY = 'hamburg'#'hamburg'#'bonn'
-    DATA_DIR = f'/media/data/mann/RL/RL/data/{CITY}'
-    OUTPUT_DIR = f'/media/data/mann/RL/RL/baseline_results/f_greedy_distance/{CITY}' #'/media/data/mann/RL/Baselines/greedy_distance'
-    TEST_SET_PATH = f'/media/data/mann/RL/RL/data/{CITY}/saved_data/test_set_w_duplicate_requests_and_catprefs.csv' #'/media/data/mann/RL/RL/baseline_results/test_set.csv'
+    DATA_DIR = f'./data/{CITY}'
+    OUTPUT_DIR = f'./results/f_greedy_distance/{CITY}' #'/media/data/mann/RL/Baselines/greedy_distance'
+    TEST_SET_PATH = f'./data/{CITY}/saved_data/test_set.csv' #'/media/data/mann/RL/RL/baseline_results/test_set.csv'
     os.makedirs(OUTPUT_DIR, exist_ok = True)
 
     # dataframe with route requests of test set
