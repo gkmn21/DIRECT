@@ -578,21 +578,21 @@ if __name__ == '__main__':
     duplicate_copies = 3 # Number of duplicate requests for each request in test set
     MAX_POIS = 250
     MAX_START_NODES = 200
-    CITY = 'berlin' #'hamburg' # 'bonn'
+    CITY = 'bonn' #'hamburg' # 'berlin'
 
-    location_dict = {
-        "city": "Berlin",
-        "country": "Germany",
-    }
+    # location_dict = {
+    #     "city": "Berlin",
+    #     "country": "Germany",
+    # }
     # location_dict =     {
     #     "city": "Hamburg",
     #     "country": "Germany",
     # }
-    # location_dict = {
-    #     "city": "Bonn",
-    #     "state": "North Rhine-Westphalia",
-    #     "country": "Germany",
-    # }
+    location_dict = {
+        "city": "Bonn",
+        "state": "North Rhine-Westphalia",
+        "country": "Germany",
+    }
 
     OSM_ID = 'R62508' # Bonn #'R62422' # Berlin #'R62782'  Hamburg#'R62422'
     CITY_LAT_LON = (50.7352621, 7.1024635) #Bonn #(52.5108850, 13.3989367) # Berlin #(50.7352621, 7.1024635) Bonn #(53.550341,10.000654) Hamburg #(52.5108850, 13.3989367) 
