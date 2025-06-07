@@ -83,9 +83,9 @@ def greedy_path_builder(final_pois_df, distance_matrix, idx2poiid, iteration_POI
 if __name__ == '__main__':
     #%%
     CITY = 'berlin' #'bonn'
-    DATA_DIR = f'./data/{CITY}'
-    OUTPUT_DIR = f'./results/f_greedy_popularity/{CITY}'
-    TEST_SET_PATH = f'./data/{CITY}/saved_data/test_set.csv'
+    DATA_DIR = f'../data/{CITY}'
+    OUTPUT_DIR = f'../results/f_greedy_popularity/{CITY}'
+    TEST_SET_PATH = f'../data/{CITY}/saved_data/test_set.csv'
     os.makedirs(OUTPUT_DIR, exist_ok = True)
     
     # dataframe with route requests of test set
