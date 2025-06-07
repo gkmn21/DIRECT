@@ -32,10 +32,6 @@ def score_candidates(distances, diversity_deltas, coverage_deltas, cat_pref_scor
     out = np.empty_like(distances)
 
     for i in range(len(distances)):
-        # score
-        # out[i] = (
-        #     (alpha_diversity * diversity_deltas[i]) + (alpha_coverage * coverage_deltas[i])
-        #     ) / (alpha_distance * distances[i])
         out[i] = (
             (alpha_diversity * diversity_deltas[i]) + (alpha_coverage * coverage_deltas[i]) + (alpha_cat_pref * cat_pref_scores[i])
         )

@@ -129,23 +129,7 @@ def compute_metrics(
     
     merged_results_df['routes_wo_end_node'] = routes_wo_end_node
 
-    
-    # metrics_dict = {
-    #     'median_route_length': None,
-    #     'median_n_unique_nodes': None,
-    #     'mean_route_length': None,
-    #     'reachability': None,
-    #     'mean_reachability_distance': None, # mean reachability distance
-    #     'n_routes_within_walkable_distance': None,
-    #     'n_routes_within_time_constraint': None,
-    #     'feasibility': None, # routes within walkable distance and time constraint
-    #     'arp': None, # average recommendation popularity
-    #     'gini_index': None, # gini index
-    #     'average_alphaNDCG': None, # average alphaNDCG
-    #     'median_coverage': None,  # median of coverage, coverage is the no. of geohash cells covered by POIs in route
-    #     'ild': None,
-    #     'average_dice_similarity': None
-    # }
+
     metrics_dict = {
         'mean_route_length': None,
         'n_unique_pois': None,
@@ -159,8 +143,7 @@ def compute_metrics(
         'arf': None, # average recommendation popularity
         'ards': None,
         'pc': None,
-        'arp': None,
-        'arp_n':None
+        'arp': None
     }
     metrics_std_dict = {
         'route_length': None,
@@ -390,21 +373,6 @@ def compute_metrics(
     merged_results_df['route_popularity'] = routes_w_popularity
     metrics_dict['arp'] = merged_results_df['route_popularity'].mean()
 
-    # popularity_normalised
-    final_pois_df['popularity_percent'] = final_pois_df['importance_score']/final_pois_df['importance_score'].sum()
-    routes_w_popularity2 = []
-    for r in list(merged_results_df['routes_wo_end_node']):
-        route_popularity2 = 0
-        if len(r) != 0:
-            route_popularity2 = np.mean(
-                [
-                    final_pois_df[final_pois_df['osm_id'] == osm_id]['popularity_percent'].values[0] for osm_id in r
-                ]
-            )
-        routes_w_popularity2.append(route_popularity2)
-    merged_results_df['route_popularity2'] = routes_w_popularity2
-    metrics_dict['arp_n'] = merged_results_df['route_popularity2'].mean()
-
 
     print(f'metrics_dict {metrics_dict}')
     print(f'metrics std dict {metrics_std_dict}')
@@ -429,24 +397,24 @@ def compute_metrics(
 
 if __name__ == '__main__':
     #%%
-    CITY = 'berlin'#'wangerland'#'hanover'
-    DATA_PATH = f'/media/data/mann/RL/RL/data/{CITY}/saved_data' # '/media/data/mann/RL/RL/baseline_results/'
+    CITY = 'berlin'
+    DATA_PATH = f'/media/data/mann/RL/RL/data/{CITY}/saved_data'
     
     # path to model results dataframe and metrics save path
-    MODEL_NAME = 'abl_wo_dist_time_benefit_berlin'#'direct_w_cat_pref_hamburg'#'exp1205_1_990K_wprefs_1weight_dice' #'exp1205_1_990K_wprefs_0.5weight'#'exp1205_1_990K' #'exp1205_1_990K'#'rl_baseline' #'classical_model' #f'greedy_distance' # 'greedy_distance' # 'exp2204_5' 2)
-    RESULTS_PATH = f'/media/data/mann/RL/RL/baseline_results/{MODEL_NAME}/{CITY}/episode_results.csv' #'/media/data/mann/RL/RL/baseline_results/cb/test_results_df_seconds.csv'
+    MODEL_NAME = 'exp1'
+    RESULTS_PATH = f'/media/data/mann/RL/RL/baseline_results/{MODEL_NAME}/{CITY}/episode_results.csv' 
     
-    TEST_SET_PATH = f'/media/data/mann/RL/RL/data/{CITY}/saved_data/test_set_w_duplicate_requests_and_catprefs.csv' # '/media/data/mann/RL/RL/baseline_results/test_set.csv'
-    METRICS_SAVE_PATH = f'/media/data/mann/RL/RL/baseline_results/{MODEL_NAME}/{CITY}/metrics'#f'/media/data/mann/RL/RL/baseline_results/{MODEL_NAME}/metrics'
-    METRICS_RESULTS_CSV_PATH = METRICS_SAVE_PATH #f'/media/data/mann/RL/RL/baseline_results/{MODEL_NAME}/metrics'
+    TEST_SET_PATH = f'/media/data/mann/RL/RL/data/{CITY}/saved_data/test_set.csv'
+    METRICS_SAVE_PATH = f'/media/data/mann/RL/RL/baseline_results/{MODEL_NAME}/{CITY}/metrics'
+    METRICS_RESULTS_CSV_PATH = METRICS_SAVE_PATH 
     os.makedirs(METRICS_SAVE_PATH, exist_ok = True)
     os.makedirs(METRICS_RESULTS_CSV_PATH, exist_ok = True)
     
     # model specific column names
-    REQ_ID_COL = 'req_id' #'req_id' #'id_veronacard' # 'req_id'
-    ROUTE_COL = 'route' #'route' #'itinerary' # 'Cycle_w_osm_ids'
-    ROUTE_COL_CONTAINS_OSM_IDS = False # False # True # False 1)
-    REMOVE_START_NODE = True # set this value to False if start node is not included in route
+    REQ_ID_COL = 'req_id'
+    ROUTE_COL = 'route'
+    ROUTE_COL_CONTAINS_OSM_IDS = False # Change to True for Naive baselines
+    REMOVE_START_NODE = True 
     GEOHASH_PRECISION = 7 # 153m × 153m	
     TEST_SET_W_CATEGORIES = True # whether test set contains user category prefs
 

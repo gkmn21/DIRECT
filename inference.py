@@ -45,16 +45,16 @@ if __name__ == '__main__':
     #%%
     np.random.seed(SEED)
 
-    EXP_NAME = 'abl_wo_dist_time_penalty_berlin'#'exp0605_2'#'exp3004_1'#'exp2604_6' 
-    MODEL_ITERATION = '1390000.zip'#'1360000.zip'#'930000.zip'
-    CITY = 'berlin' #'wangerland'#'wangerland' # 'bonn'
-    DATA_DIR = f'/media/data/mann/RL/RL/data/{CITY}'
-    IMPL_DIR = '/media/data/mann/RL/RL/content/' #'/media/data/mann/RL/motores_prez/hanover'#'/media/data/mann/RL/RL'
-    OUTPUT_DIR = f'/media/data/mann/RL/Outputs/{EXP_NAME}/{CITY}'#'/media/data/mann/RL/Outputs/motores_prez/hanover/exp1'
+    EXP_NAME = 'exp1' 
+    MODEL_ITERATION = '1390000.zip'
+    CITY = 'berlin'
+    DATA_DIR = f'./data/{CITY}'
+    IMPL_DIR = './content/'
+    OUTPUT_DIR = f'./Outputs/{EXP_NAME}/{CITY}'
     os.makedirs(OUTPUT_DIR, exist_ok = True)
     #%%
         #---------------------------------------------------------------------------------------#
-    TEST_SET_PATH = f'/media/data/mann/RL/RL/data/{CITY}/saved_data/test_set_w_duplicate_requests_and_catprefs.csv' # '/media/data/mann/RL/RL/baseline_results/test_set.csv'
+    TEST_SET_PATH = f'/media/data/mann/RL/RL/data/{CITY}/saved_data/test_set.csv'
     # dataframe with route requests of test set
     test_set = pd.read_csv(
         TEST_SET_PATH
