@@ -5,14 +5,9 @@ Source code for paper 'DIRECT: Deep Reinforcement Learning for Tourist Route Rec
 
 This folder contains the source code for the paper **DIRECT: Deep Reinforcement Learning for Tourist Route Recommendation**.
 
-## Folders
-- `SSLP`, `USLP` - contain codes for the models SSLP and USLP respectively
-- `Datasets` - contains TD1, TD2 and ID1 datasets.
-- `Ground Truth Generation` - contains groundtruth generation scripts for creating TD1, TD2 and ID1 datasets.
-
 
 ## Dependencies
-The `requirements.txt` has been provided for creating a venv environment with all dependencies. To install the requirements run:
+The `requirements.txt` has been provided for creating a virtual environment with all dependencies. To install the requirements run:
 ```
 pip install -r requirements.txt
 ```
@@ -24,16 +19,16 @@ Dependencies include:
 - `gymnasium`
 
 ## Dataset Generation
-The folder `dataset_generation` contains scripts for dataset generation.
+The folder `dataset_generation` contains scripts to generate datasets.
 
-- Run script `prepare_data.py` to fetch data for a region. The generated dataset files will be present in `data` folder.
+- Run script `prepare_data.py` to fetch data from OSM for a region. The generated dataset files will be saved in `data` folder.
 
-## DIRECT model
+## DIRECT Model
 - Run script `run_model.py` to train the model.
-- Run script `inference.py` to run inference of the test set.
+- Run script `inference.py` to run inference on the test set.
 - Finally, run script `eval.py` to obtain the evaluation metrics.
 
-### Baselines
+## Baselines
 - The scripts for naive baselines SP and GP is present in the folder `Baselines`.
 - 2. Source code provided by the publications was used for baselines RB&C and D-RL
 
