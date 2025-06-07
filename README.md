@@ -27,6 +27,6 @@ The folder `dataset_generation` contains scripts to generate datasets.
 
 ## Baselines
 - The scripts for naive baselines SP and GP is present in the folder `Baselines`.
-- 2. Source code provided by the publications was used for baselines RB&C and D-RL
+- Source code provided by the publications was used for baselines RB&C and D-RL
 
 
