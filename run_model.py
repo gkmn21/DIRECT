@@ -45,10 +45,10 @@ if __name__ == '__main__':
     np.random.seed(SEED)
 
     EXP_NAME = 'exp1'
-    CITY = 'berlin'
+    CITY = 'bonn'
     DATA_DIR = f'./data/{CITY}'
     IMPL_DIR = './content/'
-    OUTPUT_DIR = f'./Outputs/{EXP_NAME}'
+    OUTPUT_DIR = f'./results/{EXP_NAME}'
     os.makedirs(OUTPUT_DIR, exist_ok = True)
     
     #---------------------------------------------------------------------------------------#
@@ -126,9 +126,9 @@ if __name__ == '__main__':
         max_city_graph_nodes = 500,
         alpha_params_dict = {
             'temporal_distance': 1,# 0.33,
-            'diversity': 0.5, # 0.33,
-            'coverage': 0.5, # 0.33
-            'cat_prefs': 0
+            'diversity': 0.33, # 0.33,
+            'coverage': 0.33, # 0.33
+            'cat_prefs': 0.33
         }
     )
 
@@ -162,7 +162,7 @@ if __name__ == '__main__':
     print('Train model')
     model_name = EXP_NAME #"exp1"
     LOG_TIMESTEPS = 10000
-    TIMESTEPS = 1400000
+    TIMESTEPS = 1000000
     models_dir = os.path.join(IMPL_DIR, 'models', model_name)
     log_dir = os.path.join(IMPL_DIR, 'logs')
     print(f'{model_name}, {models_dir}, {log_dir}')

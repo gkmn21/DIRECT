@@ -397,7 +397,7 @@ def compute_metrics(
 
 if __name__ == '__main__':
     #%%
-    CITY = 'berlin'
+    CITY = 'bonn'
     DATA_PATH = f'./data/{CITY}/saved_data'
     
     # path to model results dataframe and metrics save path

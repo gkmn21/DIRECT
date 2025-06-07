@@ -46,8 +46,8 @@ if __name__ == '__main__':
     np.random.seed(SEED)
 
     EXP_NAME = 'exp1' 
-    MODEL_ITERATION = '1390000.zip'
-    CITY = 'berlin'
+    MODEL_ITERATION = '10000.zip' # replace with the required model iteration
+    CITY = 'bonn'
     DATA_DIR = f'./data/{CITY}'
     IMPL_DIR = './content/'
     OUTPUT_DIR = f'./Outputs/{EXP_NAME}/{CITY}'
@@ -117,12 +117,11 @@ if __name__ == '__main__':
         output_dir = OUTPUT_DIR,
         current_mode = 'test',
         max_city_graph_nodes = MAX_CITY_GRAPH_NODES,
-        candidate_poi_generator_k = 5,
         alpha_params_dict = {
             'temporal_distance': 1,# 0.33,
-            'diversity': 0.5, # 0.33,
-            'coverage': 0.5, # 0.33
-            'cat_prefs': 0
+            'diversity': 0.33, # 0.33,
+            'coverage': 0.33, # 0.33
+            'cat_prefs': 0.33
         },
 
         #max_episode_steps = 200
