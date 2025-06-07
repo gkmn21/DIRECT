@@ -26,133 +26,6 @@ INCLUDE_KEYS = [
     'tourism'
 ]
 
-###
-# def dcg(gains, k=None):
-#     """
-#     Compute the Discounted Cumulative Gain (DCG) at position k.
-#     :param gains: List of gains (relevance scores) for ranked items.
-#     :param k: Rank position to calculate DCG at, if None, calculate DCG for the entire list.
-#     :return: DCG value.
-#     """
-#     if k is None:
-#         k = len(gains)
-#     dcg_value = 0.0
-#     for i in range(k):
-#         dcg_value += gains[i] / np.log2(i + 2)  # Log2-based discount (i + 2 for 1-based position)
-#     return dcg_value
-
-# def idcg(gains, k=None):
-#     """
-#     Compute the Ideal DCG (IDCG) at position k.
-#     :param gains: List of gains (relevance scores) for ranked items.
-#     :param k: Rank position to calculate IDCG at, if None, calculate IDCG for the entire list.
-#     :return: IDCG value.
-#     """
-#     sorted_gains = np.sort(gains)[::-1]  # Sort gains in descending order for the ideal ranking
-#     return dcg(sorted_gains, k)
-
-# def alpha_ndcg(gains, k=None):
-#     """
-#     Compute the alpha-normalized Discounted Cumulative Gain (alpha-NDCG).
-#     :param gains: List of gains (relevance scores) for ranked items.
-#     :param alpha: Scaling factor for normalization (default is 1.0).
-#     :param k: Rank position to calculate NDCG at, if None, calculate NDCG for the entire list.
-#     :return: alpha-NDCG value.
-#     """
-#     dcg_value = dcg(gains, k)
-#     ideal_dcg_value = idcg(gains, k)
-    
-#     if ideal_dcg_value == 0:
-#         return 0.0  # To avoid division by zero
-    
-#     return  (dcg_value / ideal_dcg_value)
-
-# @njit
-# def compute_gain(relevance_matrix, alpha = 0.5):
-#     '''
-#     Parameters:
-#     - relevance_matrix: 2D list or NumPy array (binary relevance per topic per document)
-#     - alpha: Redundancy penalty parameter (0 ≤ alpha ≤ 1)
-
-#     '''
-
-#     # relevance_matrix = np.array(relevance_matrix, dtype=np.float32) 
-#     num_docs, num_topics = relevance_matrix.shape  # Get matrix dimensions
-#     top_k = num_docs  # Ensure valid top_k value
-
-#     topic_coverage = np.zeros(num_topics, dtype=np.float32)  # Track topic occurrences
-
-#     gains = np.zeros(top_k, dtype=np.float32)  # Store gains for each rank position
-
-#     for i in range(top_k):
-#         relevant_topics = relevance_matrix[i] > 0  # Boolean mask for relevant topics
-#         gain_contributions = (1 - alpha) ** topic_coverage[relevant_topics] * relevance_matrix[i, relevant_topics]
-        
-#         gains[i] = np.sum(gain_contributions)  # Compute total gain for document i
-#         topic_coverage[relevant_topics] += 1  # Update topic occurrence counts
-
-#     return gains
-
-
-@njit
-def compute_gain_fast(relevance_matrix, alpha=0.5):
-    """
-    Numba-accelerated gain computation with per-topic decay factors.
-    
-    :param relevance_matrix: 2D NumPy float32 array, shape (num_docs, num_topics)
-    :param alpha: redundancy penalty (0 <= alpha <= 1)
-    :return: 1D float32 array of gains, length num_docs
-    """
-    num_docs, num_topics = relevance_matrix.shape
-
-    gains = np.zeros(num_docs, dtype=np.float32)
-    # Instead of counting coverage and doing (1-alpha)**coverage on the fly,
-    # keep a per-topic decay factor that starts at 1 and is multiplied by (1-alpha)
-    # whenever that topic is seen.
-    decays = np.ones(num_topics, dtype=np.float32)
-    factor = 1.0 - alpha
-
-    for i in range(num_docs):
-        total = 0.0
-        # iterate topics explicitly
-        for t in range(num_topics):
-            rel = relevance_matrix[i, t]
-            if rel > 0.0:
-                # multiply by current decay, add to total
-                total += decays[t] * rel
-                # bump coverage: decay[t] *= (1-alpha)
-                decays[t] *= factor
-        gains[i] = total
-
-    return gains
-
-
-###
-# Speeding up NDCG computation
-###
-def precompute_discounts(max_k):
-    # Build log_2 discounts for positions 1…max_k
-    return np.log2(np.arange(2, max_k+2))
-
-def dcg2(gains, discounts, k = None):
-    n = len(gains)
-    k = n if k is None else min(k, n)
-
-    # one vector dot instead of k Python ops
-    return float(np.dot(gains[:k], 1.0 / discounts[:k]))
-
-def idcg2(gains, discounts, k = None):
-    # sort descending then call dcg
-    sorted_g = np.sort(gains)[::-1]
-    return dcg2(sorted_g, discounts, k)
-
-def ndcg2(gains, discounts, k = None):
-    idcg_val = idcg2(gains, discounts, k)
-    if idcg_val == 0:
-        return 0.0
-    return dcg2(gains, discounts, k) / idcg_val
-
-###
 @njit
 def score_candidates(distances, diversity_deltas, coverage_deltas, cat_pref_scores, alpha_diversity, alpha_distance, alpha_coverage, alpha_cat_pref):
     
@@ -171,15 +44,6 @@ def score_candidates(distances, diversity_deltas, coverage_deltas, cat_pref_scor
 @njit
 def calculate_turn_angle_based_penalty(bearing1, bearing2):
     turn_angle = abs(bearing2 - bearing1)
-    ##
-    # min-max normalisation of penalty, 
-    # if turn_angle <= 90, min_penalty 0
-    # else max_penalty 1
-    ##
-    # penalty = turn_angle if turn_angle > 90 else 90
-
-    # normalise penalty
-    #penalty = (penalty - 90)/(360 - 90)
     penalty = turn_angle/360
         
     return -1 * penalty
@@ -243,7 +107,6 @@ class Route:
         Insert a node in route and update time_elapsed, distance_elapsed
         '''
 
-        # self.distance_elapsed += (distance_of_new_node + (visit_time_of_new_node * self.walking_speed))
         self.distance_elapsed += distance_of_new_node
         self.time_elapsed += (distance_of_new_node/self.walking_speed) + visit_time_of_new_node
 
@@ -253,7 +116,6 @@ class Route:
 
     def remove_node(self, distance_of_removed_node, visit_time_of_removed_node):
         removed_node = self.route.pop(-1)
-        # self.distance_elapsed -= (distance_of_removed_node + (visit_time_of_removed_node * self.walking_speed))
         self.distance_elapsed -= distance_of_removed_node
         self.time_elapsed -= (distance_of_removed_node/self.walking_speed) + visit_time_of_removed_node
         return removed_node
@@ -266,8 +128,6 @@ class CityEnv(gym.Env):
         self,
         city_graph = None,
         poi_limit = None,
-        # start_node_osmids = None,
-        # distance_matrix = None,
         all_start_nodes = None,
         bearing_matrix = None,
         poiid2idx = None,
@@ -277,12 +137,12 @@ class CityEnv(gym.Env):
         train_samples = None,
         current_mode = None,
         max_city_graph_nodes = None,
-        candidate_poi_generator_k = 5,
+        candidate_poi_generator_k = 3,
         alpha_params_dict = {
             'temporal_distance': 1,# 0.33,
-            'diversity': 0.5, # 0.33,
-            'coverage': 0.5, # 0.33
-            'cat_prefs': 0
+            'diversity': 0.33,
+            'coverage': 0.33, 
+            'cat_prefs': 0.33
         },
         render_mode = None
     ):
@@ -336,7 +196,6 @@ class CityEnv(gym.Env):
 
         self.map = None
 
-        # self.max_neighbors = max(dict(self.city_graph.degree()).values())
         self.candidate_poi_generator_k = candidate_poi_generator_k
         self.alpha_params_dict = alpha_params_dict
         self.rejected_nodes = None
@@ -346,7 +205,6 @@ class CityEnv(gym.Env):
         self.neighbor_nodes_scores = None
         self.all_neighbors_sorted_by_distances = None
         self.route_diversity = None
-        self.precomputed_ndcg_discounts = precompute_discounts(self.poi_limit + 2)
         self.route_poi_geohashes_list = None
         self.idx_to_geohash = {
             row['_osm_id'] : row['geohash']
@@ -365,12 +223,9 @@ class CityEnv(gym.Env):
                 'route_nodes': gym.spaces.Box(low=min(self.city_graph.nodes), high=self.max_city_graph_nodes+1, shape=(self.poi_limit,), dtype= np.int16), #high=max(self.city_graph.nodes)+1
                 'distance_elapsed': gym.spaces.Box(low=0, high=1, shape=(1,), dtype=np.float32), # max distance of route is 15 km (10km for 2hrs)
                 'time_elapsed': gym.spaces.Box(low=0, high=1, shape=(1,), dtype=np.float32), # max duration of route is 10 hrs
-                # 'distance_from_end_node': gym.spaces.Box(low=0, high=20, shape=(1,), dtype=np.float32),
-                # 'temporal_distance_from_end_node': gym.spaces.Box(low=0, high=15, shape=(1,), dtype=np.float32),
                 'distance_from_end_node': gym.spaces.Box(low=-1, high=1, shape=(1,), dtype=np.float32),
                 'temporal_distance_from_end_node': gym.spaces.Box(low=-1, high=1, shape=(1,), dtype=np.float32),
                 'poi_count': gym.spaces.Box(low=0, high=1, shape=(1,), dtype=np.int8),
-                # 'neighbor_nodes_scores': gym.spaces.Box(low=0, high=1, shape=(5,), dtype= np.float32)
                 'selected_neighbors_dist_benefit': gym.spaces.Box(low=-1, high=1, shape=(self.candidate_poi_generator_k,), dtype= np.float32),
                 'selected_neighbors_time_benefit': gym.spaces.Box(low=-1, high=1, shape=(self.candidate_poi_generator_k,), dtype= np.float32),
                 'selected_neighbors_turn_angle': gym.spaces.Box(low =-1, high=0, shape=(self.candidate_poi_generator_k,), dtype=np.float32)
@@ -410,8 +265,7 @@ class CityEnv(gym.Env):
         _distance_elapsed = np.clip(normalise_value(self.route_instance.distance_elapsed, self.constraints_dict['distance_constraint']),
         0, 1
         )
-        # _distance_from_end_node = normalise_value(self.distance_from_end_node, (self.constraints_dict['distance_constraint'] - self.route_instance.distance_elapsed))
-        # _temporal_distance_from_end_node = normalise_value((self.distance_from_end_node / self.walking_speed), (self.constraints_dict['time_constraint'] - self.route_instance.time_elapsed))
+
         _time_elapsed = np.clip(normalise_value(self.route_instance.time_elapsed, self.constraints_dict['time_constraint']),
         0, 1
         )
@@ -440,12 +294,8 @@ class CityEnv(gym.Env):
             'selected_neighbors_dist_benefit': selected_neighbors_dist_benefit,
             'selected_neighbors_time_benefit': selected_neighbors_time_benefit,
             'selected_neighbors_turn_angle': selected_neighbors_turn_angle
-            # 'neighbor_nodes_scores': neighbor_nodes_scores
         }
         
-        # serializable_data = {key: value.tolist() for key, value in obs.items()}
-        # with open('results.jsonl', "a") as f:
-        #     f.write(json.dumps(serializable_data) + "\n")
 
         return obs
 
@@ -484,17 +334,6 @@ class CityEnv(gym.Env):
             
         end_node = start_node 
 
-        # remove all other start nodes which are not start node of the current request from city graph
-        #self.city_graph = copy.deepcopy(self.original_graph)
-        #self.city_graph.remove_nodes_from([x for x in self.all_start_nodes if x != start_node])
-        ##
-        # If previous episode was truncated, remove node
-        ##
-        # if self.route_instance:
-        #     try:
-        #         self.city_graph.remove_node(self.route_instance.start_node)
-        #     except Exception as e:
-        #         print(e)
         
         # insert start node and its attributes and edges in city graph
         self.city_graph.add_node(start_node, **self.original_graph.nodes[start_node])
@@ -503,8 +342,6 @@ class CityEnv(gym.Env):
 
         # walkable distance
         distance_constraint = 10 if time_constraint <= 2 else 15
-        # Commented this change: insert extra visit time in distance constraint, since we only check distance_elapsed currently
-        # distance_constraint = (distance_constraint + (walking_speed * (time_constraint - 3))) if time_constraint > 3 else distance_constraint
 
         self.constraints_dict = {
             'time_constraint': time_constraint,
@@ -521,8 +358,7 @@ class CityEnv(gym.Env):
         self.distance_from_end_node = 0
         self.rejected_nodes = set([])
         self.route_poi_geohashes_list = [self.idx_to_geohash[start_node]]
-        # self.neighbor_nodes_scores = self.set_neighbor_nodes_scores()
-        # self.route_diversity = self.compute_alpha_ndcg(self.route_instance.route)
+
         self.route_diversity = self.compute_route_ild(self.route_instance.route)
         (
             self.selected_neighbors,
@@ -554,88 +390,14 @@ class CityEnv(gym.Env):
             'route': self.route_instance.route
         }
         return observation, info
-    
-    
-    # def set_neighbor_nodes_scores(self):
-    #     current_node = self.route_instance.route[-1]
-
-    #     current_node_neighbors = list(self.city_graph.neighbors(current_node))
-    #     # remove previously traversed node and self.rejected_nodes from neighbors
-    #     if len(self.route_instance.route) > 1:
-    #         current_node_neighbors = [neigh for neigh in list(self.city_graph.neighbors(current_node)) if (neigh not in self.route_instance.route)]
-    #         if len(self.rejected_nodes) > 0:
-    #             current_node_neighbors = [neigh for neigh in current_node_neighbors if all(neigh != tup for tup in self.rejected_nodes)]
-
-    #     # sort neighbors in ascending order based on distance and insert next nearest node
-    #     sorted_neighbors_by_distances = sorted(
-    #         [
-    #         (s, self.unfiltered_distance_matrix[self.poiid2idx[current_node]][self.poiid2idx[s]]) for s in current_node_neighbors
-    #         ],
-    #         key = lambda x:x[1]
-    #     )
-
-
-    #     # normalise and return scores
-    #     # scores = [s[1]/self.constraints_dict['distance_constraint'] for s in sorted_neighbors_by_distances[:5]]
-    #     # normalise scores on remaining distance and time budget
-    #     remaining_distance_budget = self.constraints_dict['distance_constraint'] - self.route_instance.distance_elapsed
-    #     remaining_time_budget = self.constraints_dict['time_constraint'] - self.route_instance.time_elapsed
-    #     neighbors_distance_scores = [1 - (s[1]/remaining_distance_budget) for s in sorted_neighbors_by_distances[:5]]
-    #     # visit time of top-5 neighbors
-    #     neighbors_visit_time_scores = [
-    #         1 - (self.city_graph.nodes[s[0]].get('min_visit_time', 0)/remaining_time_budget) for s in sorted_neighbors_by_distances[:5]
-    #     ]
-    #     neighbors_distance_scores = [1 - (s[1]/remaining_distance_budget) for s in sorted_neighbors_by_distances[:5]]
-    #     scores = [neighbors_distance_scores[idx] + neighbors_visit_time_scores[idx] for idx, _ in enumerate(neighbors_distance_scores)]
-
-
-    #     if len(scores) < 5:
-    #         scores = scores + [0] * (5 - len(scores))
-            
-    #     return np.array(scores, dtype = np.float32) 
-    
-    # def normalise_value(self, value, max_value):
-    #     return value / max_value
         
     
     def candidate_poi_generator(self, k):
         '''
         Generates POI candidates for insert operation
         '''
-        # alpha parameters
-        # alpha_keys = [
-        #     'temporal_distance', 'diversity', 'category_preference', 'popularity', 'coverage'
-        # ]
-        # alpha_keys = [
-        #     'temporal_distance', 'diversity'
-        # ]
-        # alpha_params_dict = dict.fromkeys(alpha_keys, 1)
-        
-        # # normalise alpha params
-        # alphas_sum = sum([v for _, v in alpha_params_dict.items()])
-        # for alpha_k, v in alpha_params_dict.items():
-        #     alpha_params_dict[alpha_k] = v/alphas_sum
-        # alpha_params_dict = {
-        #     'temporal_distance': 1,# 0.33,
-        #     'diversity': 0.5, # 0.33,
-        #     'coverage': 0.5, # 0.33
-        #     'cat_prefs': 0
-        # }
 
         request_cat_prefs = self.constraints_dict.get('cat_prefs', None)
-        # if not (request_cat_prefs is None):
-        #     # alpha_params_dict = {
-        #     #     'temporal_distance': 1,# 0.33,
-        #     #     'diversity': 0.33, # 0.33,
-        #     #     'coverage': 0.33, # 0.33
-        #     #     'cat_prefs': 0.33
-        #     # }
-        #     self.alpha_params_dict = {
-        #         'temporal_distance': 1,# 0.33,
-        #         'diversity': 0, # 0.33,
-        #         'coverage': 0, # 0.33
-        #         'cat_prefs': 1
-        #     }
 
         current_node = self.route_instance.route[-1]
         start_node = self.route_instance.start_node
@@ -689,8 +451,6 @@ class CityEnv(gym.Env):
         if len(current_node_neighbors) == 0:
             return [], np.array([], dtype=np.float32), all_neighbors_sorted_by_distances, np.array([], dtype=np.float32), np.array([], dtype=np.float32), np.array([], dtype=np.float32)
 
-        # elif len(current_node_neighbors) < k:
-        #     return current_node_neighbors, np.array([1/len(current_node_neighbors)] * len(current_node_neighbors), dtype = np.float32), all_neighbors_sorted_by_distances
 
 
         # Candidate Scoring
@@ -795,8 +555,6 @@ class CityEnv(gym.Env):
             print(cat_pref_scores)
             print(request_cat_prefs)
         current_node_neighbors_probs = softmax(current_node_neighbors_scores)
-        # if len(current_node_neighbors) < k:
-        #     current_node_neighbors_probs = np.array([1/len(current_node_neighbors) for _ in current_node_neighbors])
         
         # Sample k neighbors based on probabilities
         non_zero_probs = len(current_node_neighbors_probs[current_node_neighbors_probs > 0])
@@ -828,23 +586,6 @@ class CityEnv(gym.Env):
         return selected_neighbors, selected_neighbor_probs, all_neighbors_sorted_by_distances, selected_neighbors_dist_benefit, selected_neighbors_time_benefit, selected_neighbors_turn_angle
 
 
-    def compute_alpha_ndcg(self, route):
-        '''
-        Remove start node and compute alpha-ndcg of 'route'
-        '''
-
-        alpha_ndcg_result = 0
-        if len(route) > 1:
-
-            _route = route[1: ]
-            # route_w_categories = [
-            #     self.final_pois_gdf[self.final_pois_gdf['_osm_id'] == osm_id]['tourism_category'].iloc[0] for osm_id in _route
-            # ]
-            cats = self.tourism_category_arr[_route] 
-            gains = compute_gain_fast(cats, 0.5) 
-            alpha_ndcg_result = ndcg2(gains, self.precomputed_ndcg_discounts)
-
-        return alpha_ndcg_result
     
     def compute_route_ild(self, route):
         '''
@@ -865,46 +606,12 @@ class CityEnv(gym.Env):
         action_return_tuple = None
         current_node = self.route_instance.route[-1]
 
-        # current_node_neighbors = list(self.city_graph.neighbors(current_node))
-        # # remove previously traversed node and self.rejected_nodes from neighbors
-        # if len(self.route_instance.route) > 1:
-        #     current_node_neighbors = [neigh for neigh in list(self.city_graph.neighbors(current_node)) if (neigh not in self.route_instance.route)]
-        #     if len(self.rejected_nodes) > 0:
-        #         current_node_neighbors = [neigh for neigh in current_node_neighbors if all(neigh != tup for tup in self.rejected_nodes)]
-
 
         # Action value in [0, 4] and node has neighbors: Insert node in route
         # Note: Any one of the top 5 neighbors can be inserted
         if action in range(5) and action < len(self.selected_neighbors):
             self.invalid_action_flag = False
             
-            # # sort neighbors in ascending order based on distance
-            # sorted_neighbors_by_distances = sorted(
-            #     [
-            #     (s, self.unfiltered_distance_matrix[self.poiid2idx[current_node]][self.poiid2idx[s]]) for s in current_node_neighbors
-            #     ],
-            #     key = lambda x:x[1]
-            # )
-        
-            # insert node
-            # self.route_instance.insert_node(
-            #     sorted_neighbors_by_distances[action][0], # inserted node
-            #     sorted_neighbors_by_distances[action][1], # distance of inserted node
-            #     self.city_graph.nodes[sorted_neighbors_by_distances[action][0]].get('min_visit_time', 0) # visit duration
-            # )
-            # self.distance_from_end_node = self.unfiltered_distance_matrix[self.poiid2idx[self.route_instance.route[-1]]][self.poiid2idx[self.route_instance.end_node]]
-
-            # # insert nodes with distance less than selected node as rejected nodes
-            # self.rejected_nodes.update([
-            #     n for n, dist in sorted_neighbors_by_distances[:action] if dist != sorted_neighbors_by_distances[action][1]
-            # ])
-            # # update neighbor node scores
-            # inserted_node_score = self.neighbor_nodes_scores[action]
-            # self.neighbor_nodes_scores = self.set_neighbor_nodes_scores()
-            # self.route_diversity = self.compute_alpha_ndcg(self.route_instance.route)
-
-            # action_return_tuple = ('insert', sorted_neighbors_by_distances[action][0], inserted_node_score)
-
             inserted_node = self.selected_neighbors[action]
             distance_of_inserted_node = None
             new_rejected_nodes = []
@@ -1002,33 +709,18 @@ class CityEnv(gym.Env):
         # after using 1/4 distance budget, add penalty for distance from end node and time constraint
         distance_constraint = self.constraints_dict['distance_constraint']
         time_constraint = self.constraints_dict['time_constraint']
-        # go_to_end_node_weight = 1 if self.route_instance.distance_elapsed >= (distance_constraint/4) else 0
         distance_based_go_to_end_node_weight = 1 if self.route_instance.distance_elapsed >= (distance_constraint/4) else 0
         time_based_go_to_end_node_weight = 1 if self.route_instance.time_elapsed >= (time_constraint/4) else 0
 
 
         if not self.terminated:
 
-            ##
-            # Component A: Reward for distance elapsed
-            # Distance from end node: after using 1/4 of distance budget, add penalty for distance from end node
-            ##
-            # if go_to_end_node_weight:
-            #     reward -= self.distance_from_end_node
-            #     # reward -= (self.distance_from_end_node/(distance_constraint - self.route_instance.distance_elapsed))
-            #     reward_components_counter += 1
 
             ##
             # Component A1: Reward for distance elapsed
             ##
             if distance_based_go_to_end_node_weight:
-                # reward -= 1/self.distance_from_end_node
-                # remaining_distance_budget = (distance_constraint/4) - self.route_instance.distance_elapsed
-                # _distance_from_end_node = np.clip(
-                #     normalise_value(remaining_distance_budget - self.distance_from_end_node, remaining_distance_budget),
-                #     -1, 1
-                # )
-                # reward += _distance_from_end_node
+
                 reward -= self.distance_from_end_node
                 reward_components_counter += 1
 
@@ -1038,14 +730,6 @@ class CityEnv(gym.Env):
             if time_based_go_to_end_node_weight:
                 reward -= (self.distance_from_end_node/self.walking_speed)
                 reward_components_counter += 1
-                # #     reward -= 1/(self.distance_from_end_node/self.walking_speed)
-                # #     reward_components_counter += 1
-                # remaining_time_budget = (time_constraint/4) - self.route_instance.time_elapsed
-                # _temporal_distance_from_end_node = np.clip(
-                #     normalise_value(remaining_time_budget - (self.distance_from_end_node/self.walking_speed), remaining_time_budget),
-                #     -1, 1
-                # )
-                # reward += _temporal_distance_from_end_node
                 
 
             ##
@@ -1054,14 +738,8 @@ class CityEnv(gym.Env):
             ##
             if action_return_tuple and action_return_tuple[0] == 'insert':
                 # +1 point for each inserted node
-                # reward += 1
-                # inserted node point = node score, and incrementally increase node score, so that agent explores
-                # more pois
-                # inserted_node_score = action_return_tuple[2]
                 inserted_node_score = 1
                 if action_return_tuple[1] not in self.previously_inserted_pois_tracker:
-                #     # if inserted_node_score > 0:
-                #     #     inserted_node_score += (0.1 * len(self.route_instance.route))
                     self.previously_inserted_pois_tracker.add(action_return_tuple[1])
                     reward += inserted_node_score
                 
@@ -1083,13 +761,10 @@ class CityEnv(gym.Env):
             # Component C: Reward for reaching end node
             reward_components_counter += 1
             if self.route_instance.end_node == self.route_instance.route[-1] and len(self.route_instance.route) > 1 and self.route_instance.distance_elapsed <= distance_constraint and self.route_instance.time_elapsed <= time_constraint:
-                # reward += 100
                 reward += (100 * (len(self.route_instance.route) - 2))
             else:
                 reward -= 100
-                # reward -= 100
 
-        # self.reward = (reward / reward_components_counter) if reward_components_counter > 0 else 0
         self.reward = reward
         return self.reward
     
@@ -1110,8 +785,6 @@ class CityEnv(gym.Env):
         terminated = False
         distance_constraint = self.constraints_dict['distance_constraint']
         time_constraint = self.constraints_dict['time_constraint']
-        # if (self.route_instance.distance_elapsed >= distance_constraint) or (self.route_instance.time_elapsed >= time_constraint) or (len(self.route_instance.route) >= self.poi_limit) or (self.route_instance.end_node == self.route_instance.route[-1]) :
-        # if (self.route_instance.distance_elapsed >= distance_constraint) or (len(self.route_instance.route) >= self.poi_limit) or (self.route_instance.end_node == self.route_instance.route[-1]) :
         if (
             self.route_instance.distance_elapsed >= distance_constraint
         ) or (

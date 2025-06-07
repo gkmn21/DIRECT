@@ -34,7 +34,7 @@ import ast
 
 from collections import Counter
 from utils import read_data, rescale_inputs, normalise_inputs
-from simple_model2 import CityEnv
+from direct_env import CityEnv
 
 from constants import FINAL_CATEGORIES
 
@@ -222,21 +222,3 @@ if __name__ == '__main__':
     results_df.to_csv(os.path.join(OUTPUT_DIR, 'episode_results.csv'))
              
 
-                
-
-
-
-
-                
-
-
-
-
-
-
-
-                
-
-
-
-# %%
