@@ -36,7 +36,7 @@ from utils import read_data, rescale_inputs, normalise_inputs
 from constants import FINAL_CATEGORIES
 #from model_with_one_reward import Route, CityEnv
 # from model_return_to_start import Route, CityEnv
-from simple_model2 import CityEnv
+from direct_env import CityEnv
 
 SEED = 100
 #%%
@@ -44,16 +44,16 @@ if __name__ == '__main__':
     #%%
     np.random.seed(SEED)
 
-    EXP_NAME = 'abl_wo_dist_time_penalty_berlin'#'exp3004_1'
-    CITY = 'berlin'#'wangerland' #'bonn'
-    DATA_DIR = f'/media/data/mann/RL/RL/data/{CITY}'
-    IMPL_DIR = '/media/data/mann/RL/RL/content/' #'/media/data/mann/RL/motores_prez/hanover' #'/media/data/mann/RL/RL'
-    OUTPUT_DIR = f'/media/data/mann/RL/Outputs/{EXP_NAME}'#f'/media/data/mann/RL/Outputs/motores_prez/hanover/{EXP_NAME}'
+    EXP_NAME = 'exp1'
+    CITY = 'berlin'
+    DATA_DIR = f'./data/{CITY}'
+    IMPL_DIR = './content/' #'/media/data/mann/RL/motores_prez/hanover' #'/media/data/mann/RL/RL'
+    OUTPUT_DIR = f'./Outputs/{EXP_NAME}'#f'/media/data/mann/RL/Outputs/motores_prez/hanover/{EXP_NAME}'
     os.makedirs(OUTPUT_DIR, exist_ok = True)
     
     #---------------------------------------------------------------------------------------#
     # read data (start nodes) of training dataset
-    TRAIN_SET_PATH = f'/media/data/mann/RL/RL/data/{CITY}/saved_data/train_set.csv'
+    TRAIN_SET_PATH = f'./data/{CITY}/saved_data/train_set.csv'
     # dataframe with route requests of test set
     train_set = pd.read_csv(
         TRAIN_SET_PATH
@@ -111,9 +111,7 @@ if __name__ == '__main__':
     env = gym.make(
         'gymnasium_env/CityEnv-v0',
         city_graph = POI_graph,
-        poi_limit = 20, # Arbitrary value for now
-        # start_node_osmids = start_node_pois_within_radius,
-        # distance_matrix = distance_matrix,
+        poi_limit = 20,
         all_start_nodes = start_node_pois_within_radius,
         bearing_matrix = bearing_matrix,
         poiid2idx = poiid2idx2,
@@ -131,9 +129,7 @@ if __name__ == '__main__':
             'diversity': 0.5, # 0.33,
             'coverage': 0.5, # 0.33
             'cat_prefs': 0
-        },
-        # candidate_poi_generator_k = 5
-        #max_episode_steps = 200
+        }
     )
 
     env = gym.wrappers.TimeLimit(env, max_episode_steps = 100)
@@ -166,7 +162,7 @@ if __name__ == '__main__':
     print('Train model')
     model_name = EXP_NAME #"exp1"
     LOG_TIMESTEPS = 10000
-    TIMESTEPS = 1400000#1400000 #1300000#1500000 #1000000
+    TIMESTEPS = 1400000
     models_dir = os.path.join(IMPL_DIR, 'models', model_name)
     log_dir = os.path.join(IMPL_DIR, 'logs')
     print(f'{model_name}, {models_dir}, {log_dir}')
