@@ -575,36 +575,29 @@ if __name__ == '__main__':
     np.random.seed(SEED)
     
     #%%
-    # POI_DATA_PATH = '/media/data/mann/RL/motores_prez/ALL_POI_Wangerland - ALL_POI_Wangerland.csv'
-    duplicate_copies = 3
+    duplicate_copies = 3 # Number of duplicate requests for each request in test set
     MAX_POIS = 250
     MAX_START_NODES = 200
-    CITY = 'berlin' #'hamburg' #'berlin' #'hanover'#'wangerland' #'hanover'#'wangerland'
-    # location_dict =     {
-    #     "city": "Hanover",
-    #     "state": "Lower Saxony",
-    #     "country": "Germany",
-    # }
+    CITY = 'berlin' #'hamburg' # 'bonn'
+
     location_dict = {
         "city": "Berlin",
         "country": "Germany",
     }
-
     # location_dict =     {
     #     "city": "Hamburg",
     #     "country": "Germany",
     # }
-
     # location_dict = {
     #     "city": "Bonn",
     #     "state": "North Rhine-Westphalia",
     #     "country": "Germany",
     # }
 
-    OSM_ID = 'R62422' # Berlin #'R62508' Bonn #'R62782'  Hamburg#'R62422' Berlin # 'R62508' Bonn #'R59418' # Hanover #'R1187768' # Wangerland
-    CITY_LAT_LON = (52.5108850, 13.3989367) # Berlin #(50.7352621, 7.1024635) Bonn #(53.550341,10.000654) Hamburg #(52.5108850, 13.3989367) # Berlin #(50.7352621, 7.1024635) # Bonn   # (52.379011, 9.770108) - Hanover #(53.653567, 7.932615) - Wangerland
+    OSM_ID = 'R62422' # Berlin #'R62508' Bonn #'R62782'  Hamburg#'R62422'
+    CITY_LAT_LON = (52.5108850, 13.3989367) # Berlin #(50.7352621, 7.1024635) Bonn #(53.550341,10.000654) Hamburg #(52.5108850, 13.3989367) 
     # SAVE_PATH = f'/media/data/mann/RL/motores_prez/{CITY}/saved_data'
-    SAVE_PATH = f'/media/data/mann/RL/RL/data/{CITY}/saved_data'
+    SAVE_PATH = f'./data/{CITY}/saved_data'
     os.makedirs(SAVE_PATH, exist_ok = True)
 
     # ratio for splitting start node pois into train, val and test sets
@@ -646,12 +639,6 @@ if __name__ == '__main__':
     # (lat, lon)
     poi_data['plotting_coords'] = poi_data['geometry'].apply(lambda x: (x.y, x.x) if isinstance(x, Point) else (x.centroid.y, x.centroid.x))
     bearing_matrix = prepare_bearing_matrix(poiid2idx, poi_data)
-
-    #%%
-    ### Temp cell
-    # with open(os.path.join(SAVE_PATH,'start_node_pois_within_radius.pkl'), 'rb') as f:
-    #     start_node_poi_ids = pickle.load(f)
-    
 
     #%%
 
@@ -757,8 +744,7 @@ if __name__ == '__main__':
     #%%
     df_poi_train.to_csv(os.path.join(SAVE_PATH, 'train_set.csv'))
     df_poi_val.to_csv(os.path.join(SAVE_PATH, 'val_set.csv'))
-    df_poi_test.to_csv(os.path.join(SAVE_PATH, 'test_set.csv'))
-    test_set_w_duplicate_requests_and_catprefs.to_csv(os.path.join(SAVE_PATH, 'test_set_w_duplicate_requests_and_catprefs.csv'))
+    test_set_w_duplicate_requests_and_catprefs.to_csv(os.path.join(SAVE_PATH, 'test_set.csv'))
     
 
 # %%
