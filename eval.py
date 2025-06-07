@@ -398,14 +398,14 @@ def compute_metrics(
 if __name__ == '__main__':
     #%%
     CITY = 'berlin'
-    DATA_PATH = f'/media/data/mann/RL/RL/data/{CITY}/saved_data'
+    DATA_PATH = f'./data/{CITY}/saved_data'
     
     # path to model results dataframe and metrics save path
     MODEL_NAME = 'exp1'
-    RESULTS_PATH = f'/media/data/mann/RL/RL/baseline_results/{MODEL_NAME}/{CITY}/episode_results.csv' 
+    RESULTS_PATH = f'./results/{MODEL_NAME}/{CITY}/episode_results.csv' 
     
-    TEST_SET_PATH = f'/media/data/mann/RL/RL/data/{CITY}/saved_data/test_set.csv'
-    METRICS_SAVE_PATH = f'/media/data/mann/RL/RL/baseline_results/{MODEL_NAME}/{CITY}/metrics'
+    TEST_SET_PATH = f'./data/{CITY}/saved_data/test_set.csv'
+    METRICS_SAVE_PATH = f'./results/{MODEL_NAME}/{CITY}/metrics'
     METRICS_RESULTS_CSV_PATH = METRICS_SAVE_PATH 
     os.makedirs(METRICS_SAVE_PATH, exist_ok = True)
     os.makedirs(METRICS_RESULTS_CSV_PATH, exist_ok = True)
@@ -450,7 +450,6 @@ if __name__ == '__main__':
     start_node_pois_within_radius = [poiid2idx[_id] for _id in start_node_pois_within_radius]
     print(f'len(start_node_pois_within_radius) {len(start_node_pois_within_radius)}')
 
-    # '/media/data/mann/orienteering_problem/baseline/data/bonn/distance_matrix.npy'
     # Distance matrix in meters
     with open(f'{DATA_PATH}/distance_matrix.npy', 'rb') as f:
         distance_matrix = np.load(f)

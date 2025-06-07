@@ -47,8 +47,8 @@ if __name__ == '__main__':
     EXP_NAME = 'exp1'
     CITY = 'berlin'
     DATA_DIR = f'./data/{CITY}'
-    IMPL_DIR = './content/' #'/media/data/mann/RL/motores_prez/hanover' #'/media/data/mann/RL/RL'
-    OUTPUT_DIR = f'./Outputs/{EXP_NAME}'#f'/media/data/mann/RL/Outputs/motores_prez/hanover/{EXP_NAME}'
+    IMPL_DIR = './content/'
+    OUTPUT_DIR = f'./Outputs/{EXP_NAME}'
     os.makedirs(OUTPUT_DIR, exist_ok = True)
     
     #---------------------------------------------------------------------------------------#

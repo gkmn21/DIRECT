@@ -54,7 +54,7 @@ if __name__ == '__main__':
     os.makedirs(OUTPUT_DIR, exist_ok = True)
     #%%
         #---------------------------------------------------------------------------------------#
-    TEST_SET_PATH = f'/media/data/mann/RL/RL/data/{CITY}/saved_data/test_set.csv'
+    TEST_SET_PATH = f'./data/{CITY}/saved_data/test_set.csv'
     # dataframe with route requests of test set
     test_set = pd.read_csv(
         TEST_SET_PATH

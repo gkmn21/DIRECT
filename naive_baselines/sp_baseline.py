@@ -89,8 +89,8 @@ if __name__ == '__main__':
     #%%
     CITY = 'hamburg'#'hamburg'#'bonn'
     DATA_DIR = f'./data/{CITY}'
-    OUTPUT_DIR = f'./results/f_greedy_distance/{CITY}' #'/media/data/mann/RL/Baselines/greedy_distance'
-    TEST_SET_PATH = f'./data/{CITY}/saved_data/test_set.csv' #'/media/data/mann/RL/RL/baseline_results/test_set.csv'
+    OUTPUT_DIR = f'./results/f_greedy_distance/{CITY}' 
+    TEST_SET_PATH = f'./data/{CITY}/saved_data/test_set.csv'
     os.makedirs(OUTPUT_DIR, exist_ok = True)
 
     # dataframe with route requests of test set

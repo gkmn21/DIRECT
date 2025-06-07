@@ -596,7 +596,6 @@ if __name__ == '__main__':
 
     OSM_ID = 'R62422' # Berlin #'R62508' Bonn #'R62782'  Hamburg#'R62422'
     CITY_LAT_LON = (52.5108850, 13.3989367) # Berlin #(50.7352621, 7.1024635) Bonn #(53.550341,10.000654) Hamburg #(52.5108850, 13.3989367) 
-    # SAVE_PATH = f'/media/data/mann/RL/motores_prez/{CITY}/saved_data'
     SAVE_PATH = f'./data/{CITY}/saved_data'
     os.makedirs(SAVE_PATH, exist_ok = True)
 
